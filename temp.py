@@ -32,7 +32,7 @@ def run():
     img_file = st.file_uploader("Choose an Image", type=["jpg", "png"])
     if img_file is not None:
         st.image(img_file,use_column_width=False)
-        save_image_path = r"C:\Users\91733\Desktop\leaf-recognition-master\leaf-recognition-master\Leaf Database/"+img_file.name
+        save_image_path = "Leaf Database/"+img_file.name
         with open(save_image_path, "wb") as f:
             f.write(img_file.getbuffer())
 
