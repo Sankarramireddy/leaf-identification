@@ -22,7 +22,7 @@ def processed_img(img_path):
     return res
 
 def run():
-    img1 = Image.open("leaf.webp")
+    img1 = Image.open(r"C:\Users\91733\Desktop\leaf.webp")
     img1 = img1.resize((224,224))
     st.image(img1,use_column_width=False)
     st.title("Leaf Identification")
@@ -32,9 +32,11 @@ def run():
     img_file = st.file_uploader("Choose an Image", type=["jpg", "png"])
     if img_file is not None:
         st.image(img_file,use_column_width=False)
-        
+        save_image_path = r"C:\Users\91733\Desktop\leaf-recognition-master\leaf-recognition-master\Leaf Database/"+img_file.name
+        with open(save_image_path, "wb") as f:
+            f.write(img_file.getbuffer())
 
         if st.button("identify"):
-            
+            result = processed_img(save_image_path)
             st.success("identified leaf name  is: "+result)
 run()
