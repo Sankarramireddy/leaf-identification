@@ -35,6 +35,6 @@ def run():
         
 
         if st.button("identify"):
-            result = processed_img(save_image_path)
+            
             st.success("identified leaf name  is: "+result)
 run()
