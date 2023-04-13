@@ -22,7 +22,7 @@ def processed_img(img_path):
     return res
 
 def run():
-    img1 = Image.open(r"C:\Users\91733\Desktop\leaf.webp")
+    img1 = Image.open("leaf.webp")
     img1 = img1.resize((224,224))
     st.image(img1,use_column_width=False)
     st.title("Leaf Identification")
