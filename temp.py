@@ -32,11 +32,11 @@ def run():
     img_file = st.file_uploader("Choose an Image", type=["jpg", "png"])
     if img_file is not None:
         st.image(img_file,use_column_width=False)
-           save_image_path = +img_file.name
+        save_image_path = +img_file.name
         with open(save_image_path, "wb") as f:
             f.write(img_file.getbuffer())
             
         if st.button("identify"):
-            result = processed_img(img)
+            result = processed_img(save_image_path)
             st.success("identified leaf name  is: "+result)
 run()
