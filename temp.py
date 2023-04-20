@@ -6,7 +6,7 @@ from tensorflow import keras
 from PIL import Image
 
 # Load the saved model
-model = keras.models.load_model(r"C:\Users\91733\Desktop\GitHub\leaf-identification\leaf-identification\BC.h6")
+model = keras.models.load_model("BC.h6")
 
 # Define a function to check if an image is a leaf
 def is_leaf(image):
