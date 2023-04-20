@@ -1,42 +1,72 @@
+# Import necessary packages
 import streamlit as st
-from PIL import Image
-from keras_preprocessing.image import load_img,img_to_array
 import numpy as np
-from keras.models import load_model
+import cv2
+from tensorflow import keras
+from PIL import Image
 
-model = load_model("BC.h6",compile=False)
-lab = {0: 'Nerium Oleander', 1: 'Liriodendron Chinense', 2: 'Ginkgo Biloba', 3: 'Citrus Reticulata Blanco', 4: 'Cercis Chinensis', 5: 'Cedrus Deodara', 6: 'Acer Palmatum'}
+# Load the saved model
+model = keras.models.load_model(r"C:\Users\91733\Desktop\GitHub\leaf-identification\leaf-identification\BC.h6")
 
-def processed_img(img_path):
-    img=load_img(img_path,target_size=(224,224,3))
-    img=img_to_array(img)
-    img=img/255
-    img=np.expand_dims(img,[0])
-    answer=model.predict(img)
-    y_class = answer.argmax(axis=-1)
-    print(y_class)
-    y = " ".join(str(x) for x in y_class)
-    y = int(y)
-    res = lab[y]
-    print(res)
-    return res
+# Define a function to check if an image is a leaf
+def is_leaf(image):
+    # Convert image to HSV color space
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
-def run():
-    img1 = Image.open("leaf.webp")
-    img1 = img1.resize((224,224))
-    st.image(img1,use_column_width=False)
-    st.title("Leaf Identification")
-    st.markdown('''<h4 style='text-align: left; color: #d73b5c;'>* LEAF DATA SET</h4>''',
-                unsafe_allow_html=True)
+    # Define lower and upper bounds for green color in HSV
+    lower_green = np.array([35, 43, 46])
+    upper_green = np.array([77, 255, 255])
 
-    img_file = st.file_uploader("Choose an Image", type=["jpg", "png"])
-    if img_file is not None:
-        st.image(img_file,use_column_width=False)
-        save_image_path = "BC.h6"+img_file.name
-        with open(save_image_path, "wb") as f:
-            f.write(img_file.getbuffer())
-            
-        if st.button("identify"):
-            result = processed_img(save_image_path)
-            st.success("identified leaf name  is: "+result)
-run()
+    # Threshold the image to extract green color
+    mask = cv2.inRange(hsv, lower_green, upper_green)
+    masked_image = cv2.bitwise_and(image, image, mask=mask)
+
+    # Calculate the proportion of green pixels in the image
+    green_pixels = np.count_nonzero(mask)
+    total_pixels = mask.shape[0] * mask.shape[1]
+    proportion_green = green_pixels / total_pixels
+
+    # If the proportion of green pixels is above a certain threshold, consider it a leaf
+    if proportion_green > 0.1:
+        return True
+    else:
+        return False
+
+# Define the function to make predictions
+def predict(image_path):
+    img = Image.open(image_path).convert('RGB')
+    img = img.resize((224, 224))
+    x = np.array(img)
+    x = np.expand_dims(x, axis=0)
+    x = x/255
+    prediction = model.predict(x)
+    return prediction
+
+# Create the Streamlit app
+def app():
+    st.title('Leaf Identification')
+
+    # Create a file uploader
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+    # Make a prediction on the uploaded image and display the predicted class label
+    if uploaded_file is not None:
+        if uploaded_file.type.startswith('image'):
+            image_path = uploaded_file.name
+            with open(image_path, 'wb') as f:
+                f.write(uploaded_file.getbuffer())
+
+            # Load the image and check if it is a leaf
+            image = cv2.imread(image_path)
+            if is_leaf(image):
+                prediction = predict(image_path)
+                class_labels = ['Acer Palmatum','Cedrus Deodara','Cercis Chinensis','Citrus Reticulata Blanco','Ginkgo Biloba','Liriodendron Chinense','Nerium Oleander']
+                predicted_class = class_labels[np.argmax(prediction)]
+                st.write(f'This is a {predicted_class}')
+            else:
+                st.write('This is not a leaf.')
+        else:
+            st.write('Please upload an image file.')
+
+if __name__ == '__main__':
+    app()
