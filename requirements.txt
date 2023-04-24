@@ -2,3 +2,4 @@ Keras-Preprocessing==1.1.2
 keras==2.12.0
 tensorflow==2.12.0
 opencv-python==3.4.0.12
+--upgrade pip
